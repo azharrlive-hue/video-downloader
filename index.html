@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Vidora — Video Downloader</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #fff;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(124, 58, 237, .28), transparent 30%),
+        radial-gradient(circle at 85% 15%, rgba(236, 72, 153, .20), transparent 30%),
+        linear-gradient(135deg, #09090f, #11111c 55%, #09090f);
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: min(1050px, 92%);
+      margin: auto;
+    }
+
+    header {
+      padding: 28px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      box-shadow: 0 8px 30px rgba(139, 92, 246, .35);
+    }
+
+    .badge {
+      padding: 8px 13px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 999px;
+      color: #c4b5fd;
+      background: rgba(255,255,255,.04);
+      font-size: 12px;
+    }
+
+    main {
+      padding: 65px 0 80px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(139,92,246,.12);
+      border: 1px solid rgba(139,92,246,.25);
+      color: #c4b5fd;
+      font-size: 13px;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      font-size: clamp(42px, 7vw, 76px);
+      line-height: .98;
+      letter-spacing: -4px;
+      max-width: 850px;
+      margin: auto;
+    }
+
+    h1 span {
+      background: linear-gradient(90deg, #a78bfa, #f472b6);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .subtitle {
+      max-width: 650px;
+      margin: 25px auto 38px;
+      color: #a1a1aa;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .download-box {
+      max-width: 800px;
+      margin: auto;
+      padding: 9px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow:
+        0 25px 80px rgba(0,0,0,.45),
+        inset 0 1px 0 rgba(255,255,255,.05);
+      backdrop-filter: blur(20px);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 9px;
+    }
+
+    input {
+      flex: 1;
+      min-width: 0;
+      padding: 20px 19px;
+      border: 0;
+      outline: none;
+      border-radius: 14px;
+      color: #fff;
+      background: rgba(0,0,0,.35);
+      font-size: 15px;
+    }
+
+    input::placeholder {
+      color: #71717a;
+    }
+
+    .analyze-btn {
+      padding: 0 28px;
+      border: 0;
+      border-radius: 14px;
+      cursor: pointer;
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px;
+      background: linear-gradient(135deg, #7c3aed, #db2777);
+      box-shadow: 0 10px 30px rgba(124,58,237,.25);
+      transition: .2s;
+    }
+
+    .analyze-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+
+    .result {
+      display: none;
+      margin-top: 18px;
+      padding: 18px;
+      text-align: left;
+      border-radius: 16px;
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .video-info {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .thumbnail {
+      width: 190px;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 12px;
+      background: #18181b;
+    }
+
+    .video-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .video-meta {
+      color: #a1a1aa;
+      font-size: 13px;
+    }
+
+    .quality-section {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+
+    .quality-title {
+      color: #a1a1aa;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .qualities {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .quality {
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: #d4d4d8;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .quality.active {
+      color: #fff;
+      border-color: #8b5cf6;
+      background: rgba(139,92,246,.18);
+    }
+
+    .download-btn {
+      width: 100%;
+      margin-top: 15px;
+      padding: 15px;
+      border: 0;
+      border-radius: 12px;
+      cursor: pointer;
+      color: white;
+      font-weight: 700;
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      transition: .2s;
+    }
+
+    .download-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      max-width: 800px;
+      margin: 55px auto 0;
+    }
+
+    .feature {
+      padding: 23px 18px;
+      border-radius: 17px;
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .feature-icon {
+      font-size: 25px;
+      margin-bottom: 12px;
+    }
+
+    .feature h3 {
+      font-size: 15px;
+      margin-bottom: 7px;
+    }
+
+    .feature p {
+      color: #71717a;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    footer {
+      padding: 25px 0 35px;
+      text-align: center;
+      color: #52525b;
+      font-size: 12px;
+    }
+
+    @media (max-width: 650px) {
+      main {
+        padding-top: 35px;
+      }
+
+      h1 {
+        letter-spacing: -2px;
+      }
+
+      .input-row {
+        flex-direction: column;
+      }
+
+      .analyze-btn {
+        padding: 16px;
+      }
+
+      .video-info {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .thumbnail {
+        width: 100%;
+        height: auto;
+      }
+
+      .features {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="container">
+  <div class="logo">
+    <div class="logo-icon">▶</div>
+    Vidora
+  </div>
+
+  <div class="badge">Fast • Simple • Clean</div>
+</header>
+
+<main class="container">
+
+  <div class="eyebrow">✦ Simple video downloading</div>
+
+  <h1>
+    Download videos<br>
+    <span>in high quality.</span>
+  </h1>
+
+  <p class="subtitle">
+    Paste a video URL below and choose your preferred quality.
+    Download only content you have permission to save.
+  </p>
+
+  <div class="download-box">
+
+    <div class="input-row">
+      <input
+        id="url"
+        type="url"
+        placeholder="Paste video URL here..."
+      >
+
+      <button class="analyze-btn" onclick="analyze()">
+        Get Video
+      </button>
+    </div>
+
+    <div class="result" id="result">
+
+      <div class="video-info">
+
+        <img
+          class="thumbnail"
+          id="thumbnail"
+          src=""
+          alt="Video thumbnail"
+        >
+
+        <div>
+          <div class="video-title" id="title">
+            Video title
+          </div>
+
+          <div class="video-meta">
+            Ready to choose quality
+          </div>
+        </div>
+
+      </div>
+
+      <div class="quality-section">
+
+        <div class="quality-title">
+          Select quality
+        </div>
+
+        <div class="qualities">
+
+          <button class="quality" onclick="selectQuality(this)">
+            360p
+          </button>
+
+          <button class="quality" onclick="selectQuality(this)">
+            480p
+          </button>
+
+          <button class="quality" onclick="selectQuality(this)">
+            720p
+          </button>
+
+          <button class="quality active" onclick="selectQuality(this)">
+            1080p
+          </button>
+
+        </div>
+
+        <button class="download-btn" onclick="downloadVideo()">
+          ↓ Download 1080p
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="features">
+
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <h3>Fast</h3>
+      <p>Simple interface designed for quick downloads.</p>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">🎥</div>
+      <h3>HD Quality</h3>
+      <p>Choose available video quality up to 1080p.</p>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">🔒</div>
+      <h3>Simple & Private</h3>
+      <p>No permanent video storage is required by the UI.</p>
+    </div>
+
+  </div>
+
+</main>
+
+<footer>
+  © 2026 Vidora · Download content you are authorized to download.
+</footer>
+
+<script>
+  let selectedQuality = "1080p";
+
+  function analyze() {
+    const url = document.getElementById("url").value.trim();
+
+    if (!url) {
+      alert("Please paste a video URL first.");
+      return;
+    }
+
+    /*
+      Backend will be connected here later.
+      For now this displays the UI preview.
+    */
+
+    document.getElementById("result").style.display = "block";
+
+    document.getElementById("title").textContent =
+      "Video ready — backend connection coming next";
+
+    document.getElementById("thumbnail").style.display = "none";
+  }
+
+  function selectQuality(button) {
+
+    document
+      .querySelectorAll(".quality")
+      .forEach(btn => btn.classList.remove("active"));
+
+    button.classList.add("active");
+
+    selectedQuality = button.textContent.trim();
+
+    document.querySelector(".download-btn").textContent =
+      "↓ Download " + selectedQuality;
+  }
+
+  function downloadVideo() {
+
+    const url = document.getElementById("url").value.trim();
+
+    if (!url) {
+      alert("Please paste a video URL first.");
+      return;
+    }
+
+    alert(
+      "Download backend will be connected next.\n\n" +
+      "Selected quality: " + selectedQuality
+    );
+  }
+</script>
+
+</body>
+</html>
