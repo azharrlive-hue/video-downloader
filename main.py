@@ -7,7 +7,11 @@ import tempfile
 import os
 import uuid
 
-app = FastAPI(title="Vidora API")
+app = FastAPI(
+    title="Vidora API",
+    docs_url="/docs",
+    openapi_url="/openapi.json"
+)
 
 app.add_middleware(
     CORSMiddleware,
