@@ -45,11 +45,15 @@ def get_info(request: VideoRequest):
             detail="Please provide a supported YouTube URL."
         )
 
-    options = {
-        "quiet": True,
-        "no_warnings": True,
-        "skip_download": True,
-    }
+   options = {
+    "quiet": True,
+    "no_warnings": False,
+    "noplaylist": True,
+    "skip_download": True,
+    "js_runtimes": {
+        "deno": {}
+    },
+}
 
     try:
         with yt_dlp.YoutubeDL(options) as ydl:
@@ -71,11 +75,12 @@ def get_info(request: VideoRequest):
             ]
         }
 
-    except Exception as e:
-        raise HTTPException(
-            status_code=400,
-            detail="Unable to read video information."
-        )
+   except Exception as e:
+    print(f"YT-DLP ERROR: {repr(e)}")
+    raise HTTPException(
+        status_code=400,
+        detail=f"Unable to read video information: {str(e)}"
+    )
 
 
 @app.post("/download")
